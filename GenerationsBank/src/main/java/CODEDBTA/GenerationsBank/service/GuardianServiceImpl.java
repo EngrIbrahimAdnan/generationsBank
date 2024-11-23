@@ -7,6 +7,7 @@ import CODEDBTA.GenerationsBank.entity.UserEntity;
 import CODEDBTA.GenerationsBank.enums.Roles;
 import CODEDBTA.GenerationsBank.repository.UserRepository;
 import jakarta.mail.MessagingException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -18,14 +19,16 @@ public class GuardianServiceImpl implements GuardianService {
     private final UserRepository userRepository;
     private final EmailService emailService;
     private final VerificationTokenService tokenService;
+    private final PasswordEncoder passwordEncoder;
 
 
     private UserEntity user;
 
-    public GuardianServiceImpl(UserRepository userRepository, EmailService emailService, VerificationTokenService tokenService) {
+    public GuardianServiceImpl(UserRepository userRepository, EmailService emailService, VerificationTokenService tokenService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.tokenService = tokenService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -40,6 +43,7 @@ public class GuardianServiceImpl implements GuardianService {
 
         // Ensure user has not registered with the same email address
         if (userRepository.findByEmail(request.getEmail())!= null){
+            System.out.println(request.getEmail());
             return "The email address '"+request.getEmail()+"' is already registered with."; // Return the name of the empty field
         }
 
@@ -54,7 +58,7 @@ public class GuardianServiceImpl implements GuardianService {
         // create userEntity and store to repository, ensuring verified variable is false pending email verification
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(request.getEmail().toLowerCase()); // toLowerCase() to ensure its case in-sensitive
-        userEntity.setPassword(request.getPassword());
+        userEntity.setPassword(passwordEncoder.encode(request.getPassword())); // Abdulrahman: Encoded password using Bcrypt
         userEntity.setName(request.getUsername());//case-sensitive to make it personalized
         userEntity.setAge(request.getAge());
         userEntity.setAddress(request.getAddress());

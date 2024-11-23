@@ -1,8 +1,13 @@
 package CODEDBTA.GenerationsBank.controller;
 
 import CODEDBTA.GenerationsBank.bo.CreateUserRequest;
+import CODEDBTA.GenerationsBank.bo.LoginRequest;
+import CODEDBTA.GenerationsBank.bo.LoginResponse;
+import CODEDBTA.GenerationsBank.entity.UserEntity;
 import CODEDBTA.GenerationsBank.entity.VerificationToken;
+import CODEDBTA.GenerationsBank.service.AuthenticationService;
 import CODEDBTA.GenerationsBank.service.GuardianService;
+import CODEDBTA.GenerationsBank.service.JwtService;
 import CODEDBTA.GenerationsBank.service.VerificationTokenService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +24,15 @@ public class UserController {
 
     private final VerificationTokenService tokenService;
 
-    public UserController(GuardianService guardianService, VerificationTokenService tokenService) {
+    private final JwtService jwtService; //Abdulrahman: Required for JWT Token creation and validation
+
+    private final AuthenticationService authenticationService; //Abdulrahman: Required for login to be Validated
+
+    public UserController(GuardianService guardianService, VerificationTokenService tokenService, JwtService jwtService, AuthenticationService authenticationService) {
         this.guardianService = guardianService;
         this.tokenService = tokenService;
+        this.authenticationService = authenticationService;
+        this.jwtService = jwtService;
     }
 
     // API endpoint for creating user. Returns comprehensive response of request status and message
@@ -61,6 +72,19 @@ public class UserController {
             ));
         }
 
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginRequest request) {
+        UserEntity authenticatedUser = authenticationService.authenticate(request);
+
+        String jwtToken = jwtService.generateToken(authenticatedUser);
+
+        LoginResponse loginResponse = new LoginResponse();
+                loginResponse.setToken(jwtToken);
+                loginResponse.setExpiresIn(jwtService.getExpirationTime());
+
+        return ResponseEntity.ok(loginResponse);
     }
 
 }
