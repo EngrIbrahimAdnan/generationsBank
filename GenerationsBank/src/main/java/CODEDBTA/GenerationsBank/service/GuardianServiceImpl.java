@@ -31,6 +31,44 @@ public class GuardianServiceImpl implements GuardianService {
     @Override
     public String CreateUserAccount(CreateUserRequest request) {
 
+        String fieldMissing = validateFieldsOfRequest(request);
+
+        // if a required field is missing, return missing field name
+        if (fieldMissing != null){
+            return fieldMissing;
+        }
+
+        // Ensure user has not registered with the same email address
+        if (userRepository.findByEmail(request.getEmail())!= null){
+            return "The email address '"+request.getEmail()+"' is already registered with."; // Return the name of the empty field
+        }
+
+        String token = tokenService.generateToken(request.getEmail().toLowerCase());
+
+        try {
+            emailService.sendVerificationEmail(request.getEmail().toLowerCase(), token, request.getUsername());
+        } catch (MessagingException e) {
+            return "Unable to send Verification email to the address provided. Please ensure it is entered correctly.";
+        }
+
+        // create userEntity and store to repository, ensuring verified variable is false pending email verification
+        UserEntity userEntity = new UserEntity();
+        userEntity.setEmail(request.getEmail().toLowerCase()); // toLowerCase() to ensure its case in-sensitive
+        userEntity.setPassword(request.getPassword());
+        userEntity.setName(request.getUsername());//case-sensitive to make it personalized
+        userEntity.setAge(request.getAge());
+        userEntity.setAddress(request.getAddress());
+        userEntity.setPhoneNumber(request.getPhoneNumber());
+        userEntity.setVerified(false);//by default, the user is unverified. only after verification via email is this turned true
+        userEntity.setRole(Roles.GUARDIAN);// defaults to guardian for time being
+        userRepository.save(userEntity);
+
+        // If no empty fields are found, return null to indicate all fields are valid
+        return null;
+    }
+
+    @Override
+    public String validateFieldsOfRequest(CreateUserRequest request){
         // Create a Set to store the field names you want to skip (e.g., "age")
         Set<String> fieldsToSkip = new HashSet<>();
         fieldsToSkip.add("age");  // Add the field you want to skip (e.g., "age")
@@ -58,32 +96,7 @@ public class GuardianServiceImpl implements GuardianService {
                 e.printStackTrace();
             }
         }
-
-        // Ensure user has not registered with the same email address
-        if (userRepository.findByEmail(request.getEmail())!= null){
-            return "The email address '"+request.getEmail()+"' is already registered with."; // Return the name of the empty field
-        }
-
-        // create userEntity and store to repository, ensuring verified variable is false pending email verification
-        UserEntity userEntity = new UserEntity();
-        userEntity.setEmail(request.getEmail().toLowerCase()); // toLowerCase() to ensure its case in-sensitive
-        userEntity.setPassword(request.getPassword());
-        userEntity.setName(request.getUsername());//case-sensitive to make it personalized
-        userEntity.setAge(request.getAge());
-        userEntity.setAddress(request.getAddress());
-        userEntity.setPhoneNumber(request.getPhoneNumber());
-        userEntity.setVerified(false);//by default, the user is unverified. only after verification via email is this turned true
-        userEntity.setRole(Roles.GUARDIAN);// defaults to guardian for time being
-        userRepository.save(userEntity);
-
-        String token = tokenService.generateToken(request.getEmail().toLowerCase());
-
-        try {
-            emailService.sendVerificationEmail(request.getEmail().toLowerCase(), token, request.getUsername());
-        } catch (MessagingException e) {
-            return "Unable to send Verification email to the address provided. Please ensure it is entered correctly.";
-        }
-        // If no empty fields are found, return null to indicate all fields are valid
+        // if all fields are satisfied, return null
         return null;
     }
 

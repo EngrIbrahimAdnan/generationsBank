@@ -9,4 +9,5 @@ import org.springframework.stereotype.Service;
 public interface GuardianService {
     TransactionEntity transfer(TransferRequest transferRequest);
     String CreateUserAccount(CreateUserRequest request);
+    String validateFieldsOfRequest(CreateUserRequest request);
 }
