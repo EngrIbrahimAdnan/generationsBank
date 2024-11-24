@@ -1,6 +1,8 @@
 package CODEDBTA.GenerationsBank.bo;
 
 
+import CODEDBTA.GenerationsBank.enums.Roles;
+
 public class CreateUserRequest {
     private String email;
     private String username;
@@ -8,6 +10,7 @@ public class CreateUserRequest {
     private int age;
     private String address;
     private String phoneNumber;
+    private Roles role;
 
     public String getEmail() {
         return email;
@@ -55,5 +58,13 @@ public class CreateUserRequest {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public Roles getRole() {
+        return role;
+    }
+
+    public void setRole(Roles role) {
+        this.role = role;
     }
 }

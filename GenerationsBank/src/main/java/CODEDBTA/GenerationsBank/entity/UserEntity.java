@@ -14,14 +14,21 @@ public class UserEntity  implements UserDetails { //Abdulrahman : Implemented Us
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false) // Make email unique and non-nullable
     private String email;
-    private String password;
+
+    @Column(unique = true, nullable = false) // Make name unique and non-nullable
     private String name;
+
+    private String password;
     private int age;
     private String address;
     private String number;
     private Boolean verified;
+
+    @Enumerated(EnumType.STRING)
     private Roles role;
+
 
     @OneToMany
     List<AccountEntity> accounts;

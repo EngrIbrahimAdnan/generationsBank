@@ -20,7 +20,7 @@ public class EmailService {
 
     public void sendVerificationEmail(String toEmail, String token, String username) throws MessagingException {
         String subject = "Verify Your Email Address - Generations Bank";
-        String verificationLink = "http://localhost:8080/api/verify-email?token=" + token;
+        String verificationLink = "http://localhost:8080/api/auth/verify-email?token=" + token;
 
         // Ensures error is handled if mailSender faces an issue sending an email
         try {
