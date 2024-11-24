@@ -2,14 +2,19 @@ package CODEDBTA.GenerationsBank.service;
 
 import CODEDBTA.GenerationsBank.bo.CreateUserRequest;
 import CODEDBTA.GenerationsBank.bo.TransferRequest;
+import CODEDBTA.GenerationsBank.entity.AccountEntity;
 import CODEDBTA.GenerationsBank.entity.TransactionEntity;
 import CODEDBTA.GenerationsBank.entity.UserEntity;
-import CODEDBTA.GenerationsBank.enums.Roles;
+import CODEDBTA.GenerationsBank.exception.InsufficientBalanceException;
+import CODEDBTA.GenerationsBank.repository.AccountRepository;
+import CODEDBTA.GenerationsBank.repository.TransactionRepository;
 import CODEDBTA.GenerationsBank.repository.UserRepository;
 import jakarta.mail.MessagingException;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,15 +25,19 @@ public class GuardianServiceImpl implements GuardianService {
     private final EmailService emailService;
     private final VerificationTokenService tokenService;
     private final PasswordEncoder passwordEncoder;
+    private final AccountRepository accountRepository;
+    private final TransactionRepository transactionRepository;
 
 
     private UserEntity user;
 
-    public GuardianServiceImpl(UserRepository userRepository, EmailService emailService, VerificationTokenService tokenService, PasswordEncoder passwordEncoder) {
+    public GuardianServiceImpl(UserRepository userRepository, EmailService emailService, VerificationTokenService tokenService, PasswordEncoder passwordEncoder, AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.userRepository = userRepository;
         this.emailService = emailService;
         this.tokenService = tokenService;
         this.passwordEncoder = passwordEncoder;
+        this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     @Override
@@ -111,8 +120,53 @@ public class GuardianServiceImpl implements GuardianService {
 
     @Override
     public TransactionEntity transfer(TransferRequest transferRequest) {
+        //Getting the input parameters
+        Long senderAccountId = transferRequest.getSenderAccountId();
+        Long receiverAccountId = transferRequest.getReceiverAccountId();
+        double amount = transferRequest.getAmount();
 
-        TransactionEntity transactionEntity = new TransactionEntity();
-        return transactionEntity;
+
+        //Finding the account
+        AccountEntity senderAccount = accountRepository.findById(senderAccountId)
+                .orElseThrow(() -> new EntityNotFoundException("Sender account not found"));
+        AccountEntity receiverAccount = accountRepository.findById(receiverAccountId)
+                .orElseThrow(() -> new EntityNotFoundException("Recipient account not found"));
+
+
+        //Error Checking
+        if (amount <= 0) {
+            throw new IllegalArgumentException("Transfer amount must be greater than zero");
+        }
+        if (senderAccount.getBalance() < amount) {
+            throw new InsufficientBalanceException("Insufficient funds in the sender's account");
+        }
+
+        //Updating the balance
+        senderAccount.setBalance(senderAccount.getBalance() - amount);
+        receiverAccount.setBalance(receiverAccount.getBalance() + amount);
+
+        //Saving the updated balance
+        accountRepository.save(senderAccount);
+        accountRepository.save(receiverAccount);
+
+        //Logging the transaction
+        TransactionEntity transaction = new TransactionEntity();
+        transaction.setTransactionFromId(senderAccount.getId());
+        transaction.setTransactionToId(receiverAccount.getId());
+        transaction.setAmount(amount);
+        transaction.setTimeStamp(LocalDateTime.now());
+        transactionRepository.save(transaction);
+
+        return transaction;
+    }
+
+    @Override
+    public void addDependent(Long guardianAccountId, Long dependentAccountId) {
+        UserEntity guardianId = userRepository.findById(guardianAccountId).orElseThrow(() -> new EntityNotFoundException("Guardian ID not found"));
+        UserEntity dependentId = userRepository.findById(dependentAccountId).orElseThrow(() -> new EntityNotFoundException("Dependent ID not found"));
+
+        
+
+
     }
 }
