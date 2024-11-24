@@ -1,3 +1,0 @@
-before hosting server online, push entire repo as starting point to check if everyone is onboard.
-
-after pushing, start documenting everything, from setup to running it on machine
