@@ -13,7 +13,7 @@ import java.util.Map;
 
 //no admin authentication is implemented. anyone can access these methods
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/admin")
 public class AdminController {
 
     private final AdminService adminService;

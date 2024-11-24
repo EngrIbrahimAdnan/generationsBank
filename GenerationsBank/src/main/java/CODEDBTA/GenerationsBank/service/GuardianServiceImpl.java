@@ -43,8 +43,12 @@ public class GuardianServiceImpl implements GuardianService {
 
         // Ensure user has not registered with the same email address
         if (userRepository.findByEmail(request.getEmail())!= null){
-            System.out.println(request.getEmail());
             return "The email address '"+request.getEmail()+"' is already registered with."; // Return the name of the empty field
+        }
+
+        // Ensure user has not registered with the same username address
+        if (userRepository.findByEmail(request.getUsername())!= null){
+            return "The username '"+request.getUsername()+"' is already registered with."; // Return the name of the empty field
         }
 
         String token = tokenService.generateToken(request.getEmail().toLowerCase());
@@ -64,7 +68,7 @@ public class GuardianServiceImpl implements GuardianService {
         userEntity.setAddress(request.getAddress());
         userEntity.setPhoneNumber(request.getPhoneNumber());
         userEntity.setVerified(false);//by default, the user is unverified. only after verification via email is this turned true
-        userEntity.setRole(Roles.GUARDIAN);// defaults to guardian for time being
+        userEntity.setRole(request.getRole());// defaults to guardian for time being
         userRepository.save(userEntity);
 
         // If no empty fields are found, return null to indicate all fields are valid
@@ -76,6 +80,7 @@ public class GuardianServiceImpl implements GuardianService {
         // Create a Set to store the field names you want to skip (e.g., "age")
         Set<String> fieldsToSkip = new HashSet<>();
         fieldsToSkip.add("age");  // Add the field you want to skip (e.g., "age")
+        fieldsToSkip.add("role");
 
         // Iterate over all declared fields of the CreateUserRequest class
         for (var field : request.getClass().getDeclaredFields()) {

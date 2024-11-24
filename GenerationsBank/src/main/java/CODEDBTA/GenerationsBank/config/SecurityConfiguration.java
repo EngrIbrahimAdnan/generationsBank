@@ -34,16 +34,16 @@ public class SecurityConfiguration {
         http.csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/**")
-                .permitAll()
-                .anyRequest()
-                .authenticated()
+                .requestMatchers("/api/auth/**").permitAll() // Public endpoints
+                .requestMatchers("/api/admin/**").hasAuthority("ADMIN") // Restrict to ADMIN role
+                .anyRequest().authenticated() // All other requests require authentication
                 .and()
                 .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Stateless sessions for JWT
                 .and()
-                .authenticationProvider(authenticationProvider)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .authenticationProvider(authenticationProvider) // Custom authentication provider
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // JWT filter
+
 
         return http.build();
     }
