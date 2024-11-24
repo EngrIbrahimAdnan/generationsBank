@@ -57,7 +57,7 @@ public class AdminController {
         if (user == null){
             GetUserByIdResponse response = new GetUserByIdResponse();
             response.setMessage("User with Id " + id + " not found.");
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         else {
             GetUserByIdResponse response = new GetUserByIdResponse();
@@ -74,13 +74,13 @@ public class AdminController {
             if (user == null){
                 DeleteResponse response = new DeleteResponse();
                 response.setMessage("User with id " + id + " does not exist.");
-                return ResponseEntity.badRequest().body(response);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
             }
             else {
                 DeleteResponse response = new DeleteResponse();
                 adminService.deleteUserById(id);
                 response.setMessage("User with id " + id + " deleted successfully.");
-                return ResponseEntity.badRequest().body(response);
+                return ResponseEntity.ok().body(response);
             }
 
     }
@@ -111,7 +111,7 @@ public class AdminController {
         if (account == null){
             GetAccountResponse response = new GetAccountResponse();
             response.setMessage("Account with Id " + id + " not found.");
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         else {
             GetAccountResponse response = new GetAccountResponse();
@@ -128,13 +128,13 @@ public class AdminController {
         if (account == null){
             DeleteResponse response = new DeleteResponse();
             response.setMessage("Account with id " + id + " does not exist.");
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         else {
             DeleteResponse response = new DeleteResponse();
             adminService.deleteAccountById(id);
             response.setMessage("Account with id " + id + " deleted successfully.");
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.ok().body(response);
         }
     }
 
@@ -164,7 +164,7 @@ public class AdminController {
         if (transaction == null){
             GetTransactionResponse response = new GetTransactionResponse();
             response.setMessage("Transaction with Id " + id + " not found.");
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         else {
             GetTransactionResponse response = new GetTransactionResponse();
@@ -181,13 +181,13 @@ public class AdminController {
         if (transaction == null){
             DeleteResponse response = new DeleteResponse();
             response.setMessage("Transaction with id " + id + " does not exist.");
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         else {
             DeleteResponse response = new DeleteResponse();
             adminService.deleteTransactionById(id);
             response.setMessage("Transaction with id " + id + " deleted successfully.");
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.ok().body(response);
         }
 
     }
@@ -199,7 +199,7 @@ public class AdminController {
         if (user == null){
             AssignRoleResponse response = new AssignRoleResponse();
             response.setMessage("User with id " + request.getUserId() + " does not exist.");
-            return ResponseEntity.badRequest().body(response);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
         }
         else {
             AssignRoleResponse response = new AssignRoleResponse();

@@ -5,6 +5,7 @@ import CODEDBTA.GenerationsBank.bo.TransferRequest;
 import CODEDBTA.GenerationsBank.entity.AccountEntity;
 import CODEDBTA.GenerationsBank.entity.TransactionEntity;
 import CODEDBTA.GenerationsBank.entity.UserEntity;
+import CODEDBTA.GenerationsBank.enums.Roles;
 import CODEDBTA.GenerationsBank.exception.InsufficientBalanceException;
 import CODEDBTA.GenerationsBank.repository.AccountRepository;
 import CODEDBTA.GenerationsBank.repository.TransactionRepository;
@@ -68,6 +69,15 @@ public class GuardianServiceImpl implements GuardianService {
             return "Unable to send Verification email to the address provided. Please ensure it is entered correctly.";
         }
 
+        Roles role;
+
+        if (request.getRole() == null){
+            role = Roles.GUARDIAN;
+        }
+        else {
+            role = request.getRole();
+        }
+
         // create userEntity and store to repository, ensuring verified variable is false pending email verification
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(request.getEmail().toLowerCase()); // toLowerCase() to ensure its case in-sensitive
@@ -77,7 +87,7 @@ public class GuardianServiceImpl implements GuardianService {
         userEntity.setAddress(request.getAddress());
         userEntity.setPhoneNumber(request.getPhoneNumber());
         userEntity.setVerified(false);//by default, the user is unverified. only after verification via email is this turned true
-        userEntity.setRole(request.getRole());// defaults to guardian for time being
+        userEntity.setRole(role);// defaults to guardian for time being
         userRepository.save(userEntity);
 
         // If no empty fields are found, return null to indicate all fields are valid
