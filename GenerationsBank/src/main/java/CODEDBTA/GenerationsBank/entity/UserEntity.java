@@ -29,6 +29,8 @@ public class UserEntity  implements UserDetails { //Abdulrahman : Implemented Us
     @Enumerated(EnumType.STRING)
     private Roles role;
 
+    @OneToMany
+    private List<UserEntity> dependents;
 
     @OneToMany
     private List<AccountEntity> accounts;
@@ -141,5 +143,13 @@ public class UserEntity  implements UserDetails { //Abdulrahman : Implemented Us
 
     public void setRole(Roles role) {
         this.role = role;
+    }
+
+    public List<UserEntity> getDependents() {
+        return dependents;
+    }
+
+    public void setDependents(List<UserEntity> dependents) {
+        this.dependents = dependents;
     }
 }

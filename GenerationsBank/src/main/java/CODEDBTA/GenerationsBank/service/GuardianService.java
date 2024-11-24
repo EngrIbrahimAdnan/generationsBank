@@ -10,4 +10,5 @@ public interface GuardianService {
     TransactionEntity transfer(TransferRequest transferRequest);
     String CreateUserAccount(CreateUserRequest request);
     String validateFieldsOfRequest(CreateUserRequest request);
+    void addDependent(Long guardianAccountId, Long dependentAccountId);
 }
