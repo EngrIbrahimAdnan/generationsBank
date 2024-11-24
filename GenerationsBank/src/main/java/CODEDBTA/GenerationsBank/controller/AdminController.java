@@ -151,7 +151,7 @@ public class AdminController {
         }
         else {// if no users exist in database, return status and empty users list
             return ResponseEntity.badRequest().body(Map.of(
-                    "status", List.of("No accounts found"), // Return status message in a list
+                    "status", List.of("No transactions found"), // Return status message in a list
                     "transactions", new ArrayList<>()            // Empty list of transactions
             ));
         }
