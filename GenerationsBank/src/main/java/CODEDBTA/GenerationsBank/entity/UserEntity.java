@@ -2,26 +2,43 @@ package CODEDBTA.GenerationsBank.entity;
 
 import CODEDBTA.GenerationsBank.enums.Roles;
 import jakarta.persistence.*;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.Collection;
 import java.util.List;
 
 @Entity
-public class UserEntity {
+public class UserEntity  implements UserDetails { //Abdulrahman : Implemented UseDetails to use Spring-Security
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false) // Make email unique and non-nullable
     private String email;
-    private String password;
+
+    @Column(unique = true, nullable = false) // Make name unique and non-nullable
     private String name;
+
+    private String password;
     private int age;
     private String address;
     private String number;
     private Boolean verified;
+
+    @Enumerated(EnumType.STRING)
     private Roles role;
 
     @OneToMany
-    List<AccountEntity> accounts;
+    private List<UserEntity> dependents;
+
+    @OneToMany
+    private List<AccountEntity> accounts;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(role);
+    }
 
     public Boolean getVerified() {
         return verified;
@@ -49,6 +66,31 @@ public class UserEntity {
 
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return name;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return UserDetails.super.isAccountNonExpired();
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return UserDetails.super.isAccountNonLocked();
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return UserDetails.super.isCredentialsNonExpired();
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return UserDetails.super.isEnabled();
     }
 
     public void setPassword(String password) {
@@ -101,5 +143,13 @@ public class UserEntity {
 
     public void setRole(Roles role) {
         this.role = role;
+    }
+
+    public List<UserEntity> getDependents() {
+        return dependents;
+    }
+
+    public void setDependents(List<UserEntity> dependents) {
+        this.dependents = dependents;
     }
 }
