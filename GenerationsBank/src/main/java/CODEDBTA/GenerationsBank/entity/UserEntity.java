@@ -31,7 +31,7 @@ public class UserEntity  implements UserDetails { //Abdulrahman : Implemented Us
 
 
     @OneToMany
-    List<AccountEntity> accounts;
+    private List<AccountEntity> accounts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
