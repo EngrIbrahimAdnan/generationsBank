@@ -2,7 +2,8 @@ package CODEDBTA.GenerationsBank.entity;
 
 import jakarta.persistence.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+
 
 @Entity
 public class TransactionEntity {
@@ -11,16 +12,15 @@ public class TransactionEntity {
     private Long id;
 
     private double amount;
-    private Date date;
 
-    @ManyToOne
-    private UserEntity transactionFrom;
+    private Long transactionFromId;
 
-    @ManyToOne
-    private UserEntity transactionTo;
+    private Long transactionToId;
 
     @ManyToOne
     private AccountEntity account;
+
+    private LocalDateTime timeStamp;
 
 
     public Long getId() {
@@ -39,28 +39,20 @@ public class TransactionEntity {
         this.amount = amount;
     }
 
-    public Date getDate() {
-        return date;
+    public Long getTransactionFromId() {
+        return transactionFromId;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
+    public void setTransactionFromId(Long transactionFromId) {
+        this.transactionFromId = transactionFromId;
     }
 
-    public UserEntity getTransactionFrom() {
-        return transactionFrom;
+    public Long getTransactionToId() {
+        return transactionToId;
     }
 
-    public void setTransactionFrom(UserEntity transactionFrom) {
-        this.transactionFrom = transactionFrom;
-    }
-
-    public UserEntity getTransactionTo() {
-        return transactionTo;
-    }
-
-    public void setTransactionTo(UserEntity transactionTo) {
-        this.transactionTo = transactionTo;
+    public void setTransactionToId(Long transactionToId) {
+        this.transactionToId = transactionToId;
     }
 
     public AccountEntity getAccount() {
@@ -69,5 +61,13 @@ public class TransactionEntity {
 
     public void setAccount(AccountEntity account) {
         this.account = account;
+    }
+
+    public LocalDateTime getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(LocalDateTime timeStamp) {
+        this.timeStamp = timeStamp;
     }
 }
