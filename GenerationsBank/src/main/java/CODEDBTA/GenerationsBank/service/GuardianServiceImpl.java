@@ -1,10 +1,11 @@
 package CODEDBTA.GenerationsBank.service;
 
 import CODEDBTA.GenerationsBank.bo.CreateUserRequest;
-import CODEDBTA.GenerationsBank.bo.TransferRequest;
 import CODEDBTA.GenerationsBank.entity.AccountEntity;
 import CODEDBTA.GenerationsBank.entity.TransactionEntity;
 import CODEDBTA.GenerationsBank.entity.UserEntity;
+import CODEDBTA.GenerationsBank.enums.Roles;
+import CODEDBTA.GenerationsBank.enums.TransactionStatus;
 import CODEDBTA.GenerationsBank.exception.InsufficientBalanceException;
 import CODEDBTA.GenerationsBank.repository.AccountRepository;
 import CODEDBTA.GenerationsBank.repository.TransactionRepository;
@@ -14,8 +15,10 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -78,7 +81,15 @@ public class GuardianServiceImpl implements GuardianService {
         userEntity.setPhoneNumber(request.getPhoneNumber());
         userEntity.setVerified(false);//by default, the user is unverified. only after verification via email is this turned true
         userEntity.setRole(request.getRole());// defaults to guardian for time being
-        userRepository.save(userEntity);
+        UserEntity savedUser = userRepository.save(userEntity);
+
+        // Add AccountEntity if initial balance is provided
+        if (request.getInitialBalance() != null && request.getInitialBalance() > 0) {
+            AccountEntity account = new AccountEntity();
+            account.setBalance(request.getInitialBalance());
+            account.setUser(savedUser); // Associate account with user
+            accountRepository.save(account); // Save the account entity
+        }
 
         // If no empty fields are found, return null to indicate all fields are valid
         return null;
@@ -119,19 +130,13 @@ public class GuardianServiceImpl implements GuardianService {
     }
 
     @Override
-    public TransactionEntity transfer(TransferRequest transferRequest) {
-        //Getting the input parameters
-        Long senderAccountId = transferRequest.getSenderAccountId();
-        Long receiverAccountId = transferRequest.getReceiverAccountId();
-        double amount = transferRequest.getAmount();
-
+    public void transfer(Long fromId, Long toId, double amount) {
 
         //Finding the account
-        AccountEntity senderAccount = accountRepository.findById(senderAccountId)
+        AccountEntity senderAccount = accountRepository.findById(fromId)
                 .orElseThrow(() -> new EntityNotFoundException("Sender account not found"));
-        AccountEntity receiverAccount = accountRepository.findById(receiverAccountId)
+        AccountEntity receiverAccount = accountRepository.findById(toId)
                 .orElseThrow(() -> new EntityNotFoundException("Recipient account not found"));
-
 
         //Error Checking
         if (amount <= 0) {
@@ -157,16 +162,88 @@ public class GuardianServiceImpl implements GuardianService {
         transaction.setTimeStamp(LocalDateTime.now());
         transactionRepository.save(transaction);
 
-        return transaction;
     }
 
     @Override
-    public void addDependent(Long guardianAccountId, Long dependentAccountId) {
-        UserEntity guardianId = userRepository.findById(guardianAccountId).orElseThrow(() -> new EntityNotFoundException("Guardian ID not found"));
-        UserEntity dependentId = userRepository.findById(dependentAccountId).orElseThrow(() -> new EntityNotFoundException("Dependent ID not found"));
+    public void addDependent(Long guardianId, Long dependentId) {
+        UserEntity guardian = userRepository.findById(guardianId).orElseThrow(() -> new EntityNotFoundException("Guardian ID not found"));
+        UserEntity dependent = userRepository.findById(dependentId).orElseThrow(() -> new EntityNotFoundException("Dependent ID not found"));
 
-        
+        if (dependent.getRole().equals(Roles.DEPENDENT) && guardian.getRole().equals(Roles.GUARDIAN)) {
+            List<UserEntity> dependentList = guardian.getDependents();
+            dependentList.add(dependent);
+            guardian.setDependents(dependentList);
+            userRepository.save(guardian);
+        }
+    }
 
+    @Override
+    public List<UserEntity> viewDependents(Long guardianId) {
+        UserEntity guardian = userRepository.findById(guardianId).orElseThrow(() -> new EntityNotFoundException("Guardian ID not found"));
+        return guardian.getDependents();
+    }
 
+    @Override
+    public List<TransactionEntity> viewTransactions(Long guardianId, LocalDate startDate, LocalDate endDate, String category) {
+        AccountEntity guardian = accountRepository.findById(guardianId).orElseThrow(() -> new EntityNotFoundException("Guardian Account ID not found"));
+        List<TransactionEntity> transactions = guardian.getTransactions();
+
+        if (startDate != null && endDate != null) {
+            transactions = transactions.stream()
+                    .filter(transaction -> !transaction.getDate().isBefore(startDate) && !transaction.getDate().isAfter(endDate))
+                    .toList();
+        }
+
+        if (category != null && !category.isEmpty()) {
+            transactions = transactions.stream()
+                    .filter(transaction -> transaction.getCategory().equalsIgnoreCase(category))
+                    .toList();
+        }
+
+        return transactions;
+    }
+
+    @Override
+    public void setSpendingLimit(Long dependentAccountId, double spendingLimit) {
+        AccountEntity dependentAccount = accountRepository.findById(dependentAccountId).orElseThrow(() -> new EntityNotFoundException("Dependent Account ID not found"));
+        dependentAccount.setSpendingLimit(spendingLimit);
+        accountRepository.save(dependentAccount);
+    }
+
+    @Override
+    public void approveTransaction(Long transactionId, boolean approval) {
+        TransactionEntity transaction = transactionRepository.findById(transactionId).orElseThrow(() -> new EntityNotFoundException("Transaction ID not found"));
+
+        if (approval) {
+            transaction.setStatus(TransactionStatus.APPROVED);
+            AccountEntity account = transaction.getAccount();
+
+            if (account.getBalance() >= transaction.getAmount()) {
+                account.setBalance(account.getBalance() - transaction.getAmount());
+                accountRepository.save(account);
+            } else {
+                throw new InsufficientBalanceException("Insufficient balance for the transaction.");
+            }
+        } else {
+            transaction.setStatus(TransactionStatus.REJECTED);
+        }
+
+        transactionRepository.save(transaction);
+    }
+
+    @Override
+    public TransactionEntity createTransaction(Long dependentAccountId, double amount) {
+        AccountEntity dependentAccount = accountRepository.findById(dependentAccountId).orElseThrow(() -> new EntityNotFoundException("Dependent Account ID not found"));
+
+        if (amount > dependentAccount.getSpendingLimit()) {
+            throw new IllegalArgumentException("Amount exceeds spending limit");
+        }
+
+        TransactionEntity transaction = new TransactionEntity();
+        transaction.setAccount(dependentAccount);
+        transaction.setAmount(amount);
+        transaction.setTimeStamp(LocalDateTime.now());
+        transaction.setStatus(TransactionStatus.PENDING);
+        return transactionRepository.save(transaction);
     }
 }

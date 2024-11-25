@@ -11,6 +11,7 @@ public class CreateUserRequest {
     private String address;
     private String phoneNumber;
     private Roles role;
+    private Double initialBalance;
 
     public String getEmail() {
         return email;
@@ -66,5 +67,13 @@ public class CreateUserRequest {
 
     public void setRole(Roles role) {
         this.role = role;
+    }
+
+    public Double getInitialBalance() {
+        return initialBalance;
+    }
+
+    public void setInitialBalance(Double initialBalance) {
+        this.initialBalance = initialBalance;
     }
 }

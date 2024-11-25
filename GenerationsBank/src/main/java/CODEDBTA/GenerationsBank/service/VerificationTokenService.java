@@ -29,7 +29,7 @@ public class VerificationTokenService {
         VerificationToken verificationToken = new VerificationToken();
         verificationToken.setToken(token);
         verificationToken.setEmail(email);
-        verificationToken.setExpirationTime(LocalDateTime.now().plusSeconds(30)); //plusHours(1)
+        verificationToken.setExpirationTime(LocalDateTime.now().plusHours(24)); //plusHours(1)
         tokenRepository.save(verificationToken);
         return token;
     }

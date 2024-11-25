@@ -33,7 +33,7 @@ public class UserEntity  implements UserDetails { //Abdulrahman : Implemented Us
     private List<UserEntity> dependents;
 
     @OneToMany
-    List<AccountEntity> accounts;
+    private List<AccountEntity> accounts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
