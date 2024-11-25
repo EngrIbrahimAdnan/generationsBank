@@ -71,6 +71,15 @@ public class GuardianServiceImpl implements GuardianService {
             return "Unable to send Verification email to the address provided. Please ensure it is entered correctly.";
         }
 
+        Roles role;
+
+        if (request.getRole() == null){
+            role = Roles.GUARDIAN;
+        }
+        else {
+            role = request.getRole();
+        }
+
         // create userEntity and store to repository, ensuring verified variable is false pending email verification
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(request.getEmail().toLowerCase()); // toLowerCase() to ensure its case in-sensitive
@@ -90,6 +99,7 @@ public class GuardianServiceImpl implements GuardianService {
             account.setUser(savedUser); // Associate account with user
             accountRepository.save(account); // Save the account entity
         }
+
 
         // If no empty fields are found, return null to indicate all fields are valid
         return null;
