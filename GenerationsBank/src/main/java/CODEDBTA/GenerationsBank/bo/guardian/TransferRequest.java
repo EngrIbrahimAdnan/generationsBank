@@ -1,4 +1,4 @@
-package CODEDBTA.GenerationsBank.bo;
+package CODEDBTA.GenerationsBank.bo.guardian;
 
 public class TransferRequest {
     private Long senderAccountId;

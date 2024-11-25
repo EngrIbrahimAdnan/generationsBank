@@ -13,6 +13,16 @@ public class AccountEntity {
 
     private double balance;
 
+    private double spendingLimit;
+    private boolean isApproved;
+
+    @OneToMany
+    private List<TransactionEntity> transactions;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
+
     public Long getId() {
         return id;
     }
@@ -29,4 +39,35 @@ public class AccountEntity {
         this.balance = balance;
     }
 
+    public List<TransactionEntity> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(List<TransactionEntity> transactions) {
+        this.transactions = transactions;
+    }
+
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public void setUser(UserEntity user) {
+        this.user = user;
+    }
+
+    public double getSpendingLimit() {
+        return spendingLimit;
+    }
+
+    public void setSpendingLimit(double spendingLimit) {
+        this.spendingLimit = spendingLimit;
+    }
+
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
+    }
 }

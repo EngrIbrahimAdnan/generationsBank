@@ -1,8 +1,10 @@
 package CODEDBTA.GenerationsBank.entity;
 
+import CODEDBTA.GenerationsBank.enums.TransactionStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 
 @Entity
@@ -14,8 +16,12 @@ public class TransactionEntity {
     private double amount;
 
     private Long transactionFromId;
-
     private Long transactionToId;
+    private LocalDate date;
+    private String category;
+
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus status;
 
     @ManyToOne
     private AccountEntity account;
@@ -69,5 +75,29 @@ public class TransactionEntity {
 
     public void setTimeStamp(LocalDateTime timeStamp) {
         this.timeStamp = timeStamp;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public TransactionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TransactionStatus status) {
+        this.status = status;
     }
 }
