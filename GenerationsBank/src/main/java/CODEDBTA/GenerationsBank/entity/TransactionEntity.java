@@ -1,6 +1,7 @@
 package CODEDBTA.GenerationsBank.entity;
 
 import CODEDBTA.GenerationsBank.enums.TransactionStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,7 @@ public class TransactionEntity {
     private TransactionStatus status;
 
     @ManyToOne
+    @JsonIgnoreProperties(value = {"transactions"})
     private AccountEntity account;
 
     private LocalDateTime timeStamp;

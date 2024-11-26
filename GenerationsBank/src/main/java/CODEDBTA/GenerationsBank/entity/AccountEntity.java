@@ -1,5 +1,6 @@
 package CODEDBTA.GenerationsBank.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ public class AccountEntity {
     private boolean isApproved;
 
     @OneToMany
+    @JsonIgnoreProperties(value = {"account"})
     private List<TransactionEntity> transactions;
 
     @ManyToOne
@@ -69,5 +71,10 @@ public class AccountEntity {
 
     public void setApproved(boolean approved) {
         isApproved = approved;
+    }
+
+    public List<TransactionEntity> addTransaction(TransactionEntity transaction){
+        this.transactions.add(transaction);
+        return transactions;
     }
 }
