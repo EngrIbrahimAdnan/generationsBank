@@ -1,8 +1,10 @@
 package CODEDBTA.GenerationsBank.service;
 
 import CODEDBTA.GenerationsBank.bo.CreateUserRequest;
+import CODEDBTA.GenerationsBank.bo.guardian.AccountResponse;
 import CODEDBTA.GenerationsBank.bo.guardian.RestrictionRequest;
 import CODEDBTA.GenerationsBank.bo.guardian.TransactionResponse;
+import CODEDBTA.GenerationsBank.entity.AccountEntity;
 import CODEDBTA.GenerationsBank.entity.TransactionEntity;
 import CODEDBTA.GenerationsBank.entity.UserEntity;
 import org.springframework.stereotype.Service;
@@ -24,4 +26,5 @@ public interface GuardianService {
     void setTransactionLimitWeekly(Long dependentAccountId, double limit);
     void setTransactionLimitMonthly(Long dependentAccountId, double limit);
     void setTimeRestrictions(Long dependentAccountId, RestrictionRequest request);
+    AccountResponse getAccountByUserId(Long accountId);
 }
