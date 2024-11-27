@@ -3,7 +3,7 @@ package CODEDBTA.GenerationsBank.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
-import java.util.ArrayList;
+import java.time.LocalTime;
 import java.util.List;
 
 @Entity
@@ -13,16 +13,20 @@ public class AccountEntity {
     private Long id;
 
     private double balance;
+    private double maxDaily;
+    private double maxWeekly;
+    private double maxMonthly;
 
     private double spendingLimit;
-    private boolean isApproved;
+
+    private LocalTime restrictionStart;
+    private LocalTime restrictionEnd;
 
     @OneToMany
     @JsonIgnoreProperties(value = {"account"})
     private List<TransactionEntity> transactions;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @OneToOne
     private UserEntity user;
 
     public Long getId() {
@@ -65,12 +69,48 @@ public class AccountEntity {
         this.spendingLimit = spendingLimit;
     }
 
-    public boolean isApproved() {
-        return isApproved;
+    public void addTransaction(TransactionEntity transaction) {
+        this.transactions.add(transaction);
     }
 
-    public void setApproved(boolean approved) {
-        isApproved = approved;
+    public double getMaxDaily() {
+        return maxDaily;
+    }
+
+    public void setMaxDaily(double maxDaily) {
+        this.maxDaily = maxDaily;
+    }
+
+    public double getMaxWeekly() {
+        return maxWeekly;
+    }
+
+    public void setMaxWeekly(double maxWeekly) {
+        this.maxWeekly = maxWeekly;
+    }
+
+    public double getMaxMonthly() {
+        return maxMonthly;
+    }
+
+    public void setMaxMonthly(double maxMonthly) {
+        this.maxMonthly = maxMonthly;
+    }
+
+    public LocalTime getRestrictionStart() {
+        return restrictionStart;
+    }
+
+    public void setRestrictionStart(LocalTime restrictionStart) {
+        this.restrictionStart = restrictionStart;
+    }
+
+    public LocalTime getRestrictionEnd() {
+        return restrictionEnd;
+    }
+
+    public void setRestrictionEnd(LocalTime restrictionEnd) {
+        this.restrictionEnd = restrictionEnd;
     }
 
     public List<TransactionEntity> addTransaction(TransactionEntity transaction){

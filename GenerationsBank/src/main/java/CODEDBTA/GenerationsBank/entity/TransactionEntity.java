@@ -1,7 +1,6 @@
 package CODEDBTA.GenerationsBank.entity;
 
 import CODEDBTA.GenerationsBank.enums.TransactionStatus;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -12,12 +11,12 @@ import java.time.LocalDate;
 public class TransactionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long transactionId;
 
     private double amount;
 
-    private Long transactionFromId;
-    private Long transactionToId;
+    private String transactionFrom;
+    private String transactionTo;
     private LocalDate date;
     private String category;
 
@@ -28,15 +27,17 @@ public class TransactionEntity {
     @JsonIgnoreProperties(value = {"transactions"})
     private AccountEntity account;
 
+    private boolean isApproved;
+
     private LocalDateTime timeStamp;
 
 
-    public Long getId() {
-        return id;
+    public Long getTransactionId() {
+        return transactionId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setTransactionId(Long transactionId) {
+        this.transactionId = transactionId;
     }
 
     public double getAmount() {
@@ -47,20 +48,20 @@ public class TransactionEntity {
         this.amount = amount;
     }
 
-    public Long getTransactionFromId() {
-        return transactionFromId;
+    public String getTransactionFrom() {
+        return transactionFrom;
     }
 
-    public void setTransactionFromId(Long transactionFromId) {
-        this.transactionFromId = transactionFromId;
+    public void setTransactionFrom(String transactionFrom) {
+        this.transactionFrom = transactionFrom;
     }
 
-    public Long getTransactionToId() {
-        return transactionToId;
+    public String getTransactionTo() {
+        return transactionTo;
     }
 
-    public void setTransactionToId(Long transactionToId) {
-        this.transactionToId = transactionToId;
+    public void setTransactionTo(String transactionTo) {
+        this.transactionTo = transactionTo;
     }
 
     public AccountEntity getAccount() {
@@ -101,5 +102,13 @@ public class TransactionEntity {
 
     public void setStatus(TransactionStatus status) {
         this.status = status;
+    }
+
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
     }
 }
