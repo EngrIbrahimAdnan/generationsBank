@@ -90,13 +90,13 @@ public class GuardianServiceImpl implements GuardianService {
         userEntity.setAddress(request.getAddress());
         userEntity.setPhoneNumber(request.getPhoneNumber());
         userEntity.setVerified(false);//by default, the user is unverified. only after verification via email is this turned true
-        userEntity.setRole(request.getRole());// defaults to guardian for time being
+        userEntity.setRole(role);// defaults to guardian for time being
         UserEntity savedUser = userRepository.save(userEntity);
 
         // Add AccountEntity if initial balance is provided
         if (request.getInitialBalance() != null && request.getInitialBalance() >= 0) {
             AccountEntity account = new AccountEntity();
-            account.setBalance(request.getInitialBalance());
+            account.setBalance(Double.parseDouble(request.getInitialBalance()));
             account.setUser(savedUser); // Associate account with user
             accountRepository.save(account); // Save the account entity
         }
@@ -112,6 +112,7 @@ public class GuardianServiceImpl implements GuardianService {
         Set<String> fieldsToSkip = new HashSet<>();
         fieldsToSkip.add("age");  // Add the field you want to skip (e.g., "age")
         fieldsToSkip.add("role");
+        fieldsToSkip.add("initialBalance");
 
         // Iterate over all declared fields of the CreateUserRequest class
         for (var field : request.getClass().getDeclaredFields()) {
@@ -157,7 +158,7 @@ public class GuardianServiceImpl implements GuardianService {
             throw new InsufficientBalanceException("Insufficient funds in the sender's account");
         }
 
-        //Updating the balance
+
         if (senderAccount.getUser().getRole().equals(Roles.GUARDIAN)) {
             senderAccount.setBalance(senderAccount.getBalance() - amount);
             receiverAccount.setBalance(receiverAccount.getBalance() + amount);

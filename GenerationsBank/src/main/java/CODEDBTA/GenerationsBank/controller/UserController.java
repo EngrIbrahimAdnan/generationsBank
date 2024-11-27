@@ -169,7 +169,7 @@ public class UserController {
     public ResponseEntity<LoginResponse> authenticate(@RequestBody LoginRequest request) {
         UserEntity authenticatedUser = authenticationService.authenticate(request);
 
-        String jwtToken = jwtService.generateToken(authenticatedUser);
+        String jwtToken = jwtService.generateTokenWithUserId(authenticatedUser, authenticatedUser.getId());
 
         LoginResponse loginResponse = new LoginResponse();
                 loginResponse.setToken(jwtToken);

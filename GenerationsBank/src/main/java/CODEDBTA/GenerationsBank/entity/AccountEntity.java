@@ -1,5 +1,6 @@
 package CODEDBTA.GenerationsBank.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalTime;
@@ -22,6 +23,7 @@ public class AccountEntity {
     private LocalTime restrictionEnd;
 
     @OneToMany
+    @JsonIgnoreProperties(value = {"account"})
     private List<TransactionEntity> transactions;
 
     @OneToOne
@@ -109,5 +111,10 @@ public class AccountEntity {
 
     public void setRestrictionEnd(LocalTime restrictionEnd) {
         this.restrictionEnd = restrictionEnd;
+    }
+
+    public List<TransactionEntity> addTransaction(TransactionEntity transaction){
+        this.transactions.add(transaction);
+        return transactions;
     }
 }
