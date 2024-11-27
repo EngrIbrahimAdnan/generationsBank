@@ -1,6 +1,7 @@
 package CODEDBTA.GenerationsBank.entity;
 
 import CODEDBTA.GenerationsBank.enums.Roles;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,9 +32,6 @@ public class UserEntity  implements UserDetails { //Abdulrahman : Implemented Us
 
     @OneToMany
     private List<UserEntity> dependents;
-
-    @OneToMany
-    private List<AccountEntity> accounts;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -129,13 +127,6 @@ public class UserEntity  implements UserDetails { //Abdulrahman : Implemented Us
         this.number = number;
     }
 
-    public List<AccountEntity> getAccounts() {
-        return accounts;
-    }
-
-    public void setAccounts(List<AccountEntity> accounts) {
-        this.accounts = accounts;
-    }
 
     public Roles getRole() {
         return role;
