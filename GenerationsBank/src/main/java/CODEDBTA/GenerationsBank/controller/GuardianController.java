@@ -1,9 +1,7 @@
 package CODEDBTA.GenerationsBank.controller;
 
-import CODEDBTA.GenerationsBank.bo.guardian.RestrictionRequest;
-import CODEDBTA.GenerationsBank.bo.guardian.TransactionResponse;
-import CODEDBTA.GenerationsBank.bo.guardian.TransferRequest;
-import CODEDBTA.GenerationsBank.bo.guardian.DependentRequest;
+import CODEDBTA.GenerationsBank.bo.guardian.*;
+import CODEDBTA.GenerationsBank.entity.AccountEntity;
 import CODEDBTA.GenerationsBank.entity.TransactionEntity;
 import CODEDBTA.GenerationsBank.entity.UserEntity;
 import CODEDBTA.GenerationsBank.service.GuardianServiceImpl;
@@ -107,4 +105,12 @@ public class GuardianController {
         return ResponseEntity.status(HttpStatus.OK).body("Restrictions updated successfully.");
     }
 
+    @GetMapping("/getAccount/{id}")
+    public ResponseEntity<AccountResponse> getAccountByUserId(@PathVariable Long id) {
+        AccountResponse account = guardianService.getAccountByUserId(id);
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(account);
+    }
 }
