@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -96,12 +97,15 @@ public class GuardianServiceImpl implements GuardianService {
         UserEntity savedUser = userRepository.save(userEntity);
 
         // Add AccountEntity if initial balance is provided
-        if (request.getInitialBalance() != null && Double.parseDouble(request.getInitialBalance()) >= 0) {
-            AccountEntity account = new AccountEntity();
+        AccountEntity account = new AccountEntity();
+        if (request.getInitialBalance() != null) {
             account.setBalance(Double.parseDouble(request.getInitialBalance()));
-            account.setUser(savedUser); // Associate account with user
-            accountRepository.save(account); // Save the account entity
         }
+        else {
+            account.setBalance(0.0d );
+        }
+        account.setUser(savedUser); // Associate account with user
+        accountRepository.save(account); // Save the account entity
 
 
         // If no empty fields are found, return null to indicate all fields are valid
@@ -307,14 +311,27 @@ public class GuardianServiceImpl implements GuardianService {
         AccountEntity dependentAccount = accountRepository.findById(dependentAccountId)
                 .orElseThrow(() -> new EntityNotFoundException("Dependent account not found"));
 
-        LocalTime restrictedStart = LocalTime.parse(request.getRestrictionStart());
-        LocalTime restrictedEnd = LocalTime.parse(request.getRestrictionEnd());
+        try {
+            // Parse the restriction start and end times
+            LocalTime restrictedStart = LocalTime.parse(request.getRestrictionStart());
+            LocalTime restrictedEnd = LocalTime.parse(request.getRestrictionEnd());
 
-        dependentAccount.setRestrictionStart(restrictedStart);
-        dependentAccount.setRestrictionEnd(restrictedEnd);
+            // Log to ensure times are being parsed correctly
+            System.out.println("Restriction Start Time: " + restrictedStart);
+            System.out.println("Restriction End Time: " + restrictedEnd);
 
-        accountRepository.save(dependentAccount);
+            // Set the restriction times on the dependent account
+            dependentAccount.setRestrictionStart(restrictedStart);
+            dependentAccount.setRestrictionEnd(restrictedEnd);
+
+            // Save the updated account entity to the database
+            accountRepository.save(dependentAccount);
+        } catch (DateTimeParseException e) {
+            // Handle invalid time format errors
+            throw new RuntimeException("Invalid time format. Please use HH:mm.");
+        }
     }
+
 
     @Override
     public AccountResponse getAccountByUserId(Long userId) {
