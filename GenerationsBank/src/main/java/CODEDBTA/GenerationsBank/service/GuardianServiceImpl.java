@@ -95,7 +95,7 @@ public class GuardianServiceImpl implements GuardianService {
         UserEntity savedUser = userRepository.save(userEntity);
 
         // Add AccountEntity if initial balance is provided
-        if (request.getInitialBalance() != null && request.getInitialBalance() >= 0) {
+        if (request.getInitialBalance() != null && Double.parseDouble(request.getInitialBalance()) >= 0) {
             AccountEntity account = new AccountEntity();
             account.setBalance(Double.parseDouble(request.getInitialBalance()));
             account.setUser(savedUser); // Associate account with user
