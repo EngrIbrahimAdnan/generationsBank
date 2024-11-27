@@ -26,6 +26,7 @@ public class TransactionEntity {
     private TransactionStatus status;
 
     @ManyToOne
+    @JsonIgnoreProperties(value = {"transactions"})
     private AccountEntity account;
 
     private boolean isApproved;

@@ -1,6 +1,7 @@
 package CODEDBTA.GenerationsBank.service;
 
 import CODEDBTA.GenerationsBank.bo.CreateUserRequest;
+import CODEDBTA.GenerationsBank.bo.guardian.AccountResponse;
 import CODEDBTA.GenerationsBank.bo.guardian.RestrictionRequest;
 import CODEDBTA.GenerationsBank.bo.guardian.TransactionResponse;
 import CODEDBTA.GenerationsBank.entity.AccountEntity;
@@ -299,6 +300,12 @@ public class GuardianServiceImpl implements GuardianService {
         dependentAccount.setRestrictionEnd(restrictedEnd);
 
         accountRepository.save(dependentAccount);
+    }
+
+    @Override
+    public AccountResponse getAccountByUserId(Long userId) {
+        AccountEntity account = accountRepository.findByUser(userRepository.findById(userId).get()).orElseThrow(() -> new EntityNotFoundException("Account ID not found"));
+        return new AccountResponse(account.getId(), account.getBalance(), account.getMaxDaily(), account.getMaxWeekly(), account.getMaxMonthly(), account.getSpendingLimit(), account.getRestrictionStart(), account.getRestrictionEnd(), account.getUser());
     }
 
 }
