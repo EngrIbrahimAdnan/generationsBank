@@ -7,6 +7,7 @@ import CODEDBTA.GenerationsBank.entity.UserEntity;
 import CODEDBTA.GenerationsBank.enums.Roles;
 import CODEDBTA.GenerationsBank.enums.TransactionStatus;
 import CODEDBTA.GenerationsBank.exception.InsufficientBalanceException;
+import CODEDBTA.GenerationsBank.exception.InvalidRoleException;
 import CODEDBTA.GenerationsBank.repository.AccountRepository;
 import CODEDBTA.GenerationsBank.repository.TransactionRepository;
 import CODEDBTA.GenerationsBank.repository.UserRepository;
@@ -180,14 +181,26 @@ public class GuardianServiceImpl implements GuardianService {
 
     @Override
     public void addDependent(Long guardianId, Long dependentId) {
-        UserEntity guardian = userRepository.findById(guardianId).orElseThrow(() -> new EntityNotFoundException("Guardian ID not found"));
-        UserEntity dependent = userRepository.findById(dependentId).orElseThrow(() -> new EntityNotFoundException("Dependent ID not found"));
+        UserEntity guardian = userRepository.findById(guardianId)
+                .orElseThrow(() -> new EntityNotFoundException("Guardian ID not found"));
+        UserEntity dependent = userRepository.findById(dependentId)
+                .orElseThrow(() -> new EntityNotFoundException("Dependent ID not found"));
 
-        if (dependent.getRole().equals(Roles.DEPENDENT) && guardian.getRole().equals(Roles.GUARDIAN)) {
-            List<UserEntity> dependentList = guardian.getDependents();
+        if (!dependent.getRole().equals(Roles.DEPENDENT)) {
+            throw new InvalidRoleException("The user is not a valid dependent");
+        }
+        if (!guardian.getRole().equals(Roles.GUARDIAN)) {
+            throw new InvalidRoleException("The user is not a valid guardian");
+        }
+
+        List<UserEntity> dependentList = guardian.getDependents();
+        if (!dependentList.contains(dependent)) {
             dependentList.add(dependent);
             guardian.setDependents(dependentList);
             userRepository.save(guardian);
+        }
+        else {
+            throw new RuntimeException("The dependant is already assigned to the guardian");
         }
     }
 

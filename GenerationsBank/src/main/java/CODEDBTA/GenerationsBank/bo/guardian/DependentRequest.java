@@ -1,22 +1,22 @@
 package CODEDBTA.GenerationsBank.bo.guardian;
 
 public class DependentRequest {
-    private Long guardianId;
-    private Long dependentId;
+    private String guardianId;
+    private String dependentId;
 
-    public Long getGuardianId() {
+    public String getGuardianId() {
         return guardianId;
     }
 
-    public void setGuardianId(Long guardianId) {
+    public void setGuardianId(String guardianId) {
         this.guardianId = guardianId;
     }
 
-    public Long getDependentId() {
+    public String getDependentId() {
         return dependentId;
     }
 
-    public void setDependentId(Long dependentId) {
+    public void setDependentId(String dependentId) {
         this.dependentId = dependentId;
     }
 }
