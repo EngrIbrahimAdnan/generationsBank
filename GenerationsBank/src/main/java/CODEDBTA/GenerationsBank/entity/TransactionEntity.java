@@ -1,6 +1,7 @@
 package CODEDBTA.GenerationsBank.entity;
 
 import CODEDBTA.GenerationsBank.enums.TransactionStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;

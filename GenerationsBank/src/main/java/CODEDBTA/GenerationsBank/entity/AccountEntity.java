@@ -69,10 +69,6 @@ public class AccountEntity {
         this.spendingLimit = spendingLimit;
     }
 
-    public void addTransaction(TransactionEntity transaction) {
-        this.transactions.add(transaction);
-    }
-
     public double getMaxDaily() {
         return maxDaily;
     }

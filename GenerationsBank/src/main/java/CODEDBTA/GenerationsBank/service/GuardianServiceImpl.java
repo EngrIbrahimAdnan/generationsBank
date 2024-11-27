@@ -10,6 +10,7 @@ import CODEDBTA.GenerationsBank.entity.UserEntity;
 import CODEDBTA.GenerationsBank.enums.Roles;
 import CODEDBTA.GenerationsBank.enums.TransactionStatus;
 import CODEDBTA.GenerationsBank.exception.InsufficientBalanceException;
+import CODEDBTA.GenerationsBank.exception.InvalidRoleException;
 import CODEDBTA.GenerationsBank.repository.AccountRepository;
 import CODEDBTA.GenerationsBank.repository.TransactionRepository;
 import CODEDBTA.GenerationsBank.repository.UserRepository;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -95,12 +97,15 @@ public class GuardianServiceImpl implements GuardianService {
         UserEntity savedUser = userRepository.save(userEntity);
 
         // Add AccountEntity if initial balance is provided
-        if (request.getInitialBalance() != null && request.getInitialBalance() >= 0) {
-            AccountEntity account = new AccountEntity();
+        AccountEntity account = new AccountEntity();
+        if (request.getInitialBalance() != null) {
             account.setBalance(Double.parseDouble(request.getInitialBalance()));
-            account.setUser(savedUser); // Associate account with user
-            accountRepository.save(account); // Save the account entity
         }
+        else {
+            account.setBalance(0.0d );
+        }
+        account.setUser(savedUser); // Associate account with user
+        accountRepository.save(account); // Save the account entity
 
 
         // If no empty fields are found, return null to indicate all fields are valid
@@ -184,14 +189,26 @@ public class GuardianServiceImpl implements GuardianService {
 
     @Override
     public void addDependent(Long guardianId, Long dependentId) {
-        UserEntity guardian = userRepository.findById(guardianId).orElseThrow(() -> new EntityNotFoundException("Guardian ID not found"));
-        UserEntity dependent = userRepository.findById(dependentId).orElseThrow(() -> new EntityNotFoundException("Dependent ID not found"));
+        UserEntity guardian = userRepository.findById(guardianId)
+                .orElseThrow(() -> new EntityNotFoundException("Guardian ID not found"));
+        UserEntity dependent = userRepository.findById(dependentId)
+                .orElseThrow(() -> new EntityNotFoundException("Dependent ID not found"));
 
-        if (dependent.getRole().equals(Roles.DEPENDENT) && guardian.getRole().equals(Roles.GUARDIAN)) {
-            List<UserEntity> dependentList = guardian.getDependents();
+        if (!dependent.getRole().equals(Roles.DEPENDENT)) {
+            throw new InvalidRoleException("The user is not a valid dependent");
+        }
+        if (!guardian.getRole().equals(Roles.GUARDIAN)) {
+            throw new InvalidRoleException("The user is not a valid guardian");
+        }
+
+        List<UserEntity> dependentList = guardian.getDependents();
+        if (!dependentList.contains(dependent)) {
             dependentList.add(dependent);
             guardian.setDependents(dependentList);
             userRepository.save(guardian);
+        }
+        else {
+            throw new RuntimeException("The dependant is already assigned to the guardian");
         }
     }
 
@@ -294,14 +311,27 @@ public class GuardianServiceImpl implements GuardianService {
         AccountEntity dependentAccount = accountRepository.findById(dependentAccountId)
                 .orElseThrow(() -> new EntityNotFoundException("Dependent account not found"));
 
-        LocalTime restrictedStart = LocalTime.parse(request.getRestrictionStart());
-        LocalTime restrictedEnd = LocalTime.parse(request.getRestrictionEnd());
+        try {
+            // Parse the restriction start and end times
+            LocalTime restrictedStart = LocalTime.parse(request.getRestrictionStart());
+            LocalTime restrictedEnd = LocalTime.parse(request.getRestrictionEnd());
 
-        dependentAccount.setRestrictionStart(restrictedStart);
-        dependentAccount.setRestrictionEnd(restrictedEnd);
+            // Log to ensure times are being parsed correctly
+            System.out.println("Restriction Start Time: " + restrictedStart);
+            System.out.println("Restriction End Time: " + restrictedEnd);
 
-        accountRepository.save(dependentAccount);
+            // Set the restriction times on the dependent account
+            dependentAccount.setRestrictionStart(restrictedStart);
+            dependentAccount.setRestrictionEnd(restrictedEnd);
+
+            // Save the updated account entity to the database
+            accountRepository.save(dependentAccount);
+        } catch (DateTimeParseException e) {
+            // Handle invalid time format errors
+            throw new RuntimeException("Invalid time format. Please use HH:mm.");
+        }
     }
+
 
     @Override
     public AccountResponse getAccountByUserId(Long userId) {

@@ -39,10 +39,12 @@ public class GuardianController {
     @PutMapping("/addDependent")
     public ResponseEntity<String> addDependent(@RequestBody DependentRequest request) {
         try {
-            guardianService.addDependent(request.getGuardianId(), request.getDependentId());
+            guardianService.addDependent(Long.parseLong(request.getGuardianId()), Long.parseLong(request.getDependentId()));
             return ResponseEntity.ok("Dependent successfully added to the guardian.");
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
